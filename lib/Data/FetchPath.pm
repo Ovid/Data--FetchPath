@@ -82,6 +82,9 @@ structure:
  uno
  dos
 
+Currently the data structure must be an array or hash reference.  The value
+must be a scalar or a regular expression.
+
 =cut
 
 use Scalar::Util 'reftype';
