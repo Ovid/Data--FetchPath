@@ -4,29 +4,35 @@ use strict;
 use warnings;
 
 use lib 'lib', 't/lib';
-use Test::Most 'no_plan';    # tests => 1;
+use Test::Most tests => 18;
 
 use Data::FetchPath 'path';
+
+sub srt ($) { 
+    no warnings 'uninitialized';
+    @$_[0] = sort @$_[0]; 
+    shift;
+};
 
 my $data = [ 'foo', 'bar', 3, undef, 3 ];
 ok my $paths = path( $data, 3 ),
   'Fetching paths for matching data should succeed';
-is_deeply $paths, [ '[2]', '[4]' ],
+is_deeply srt $paths, srt [ '[2]', '[4]' ],
   '... and it should return the correct paths for a simple array';
 
 $data->[4] = [ 0, 3 ];
 ok $paths = path( $data, 3 ), 'Fetching paths for matching data should succeed';
-is_deeply $paths, [ '[2]', '[4][1]' ], '... or for a complex array';
+is_deeply srt $paths, srt [ '[2]', '[4][1]' ], '... or for a complex array';
 
 $data = [ 3, 7, 9, [ 3, 1, 3, [ 3, 5, 2 ] ] ];
 ok $paths = path( $data, 3 ), 'Fetching paths for matching data should succeed';
-is_deeply $paths, [ '[0]', '[3][0]', '[3][2]', '[3][3][0]' ],
+is_deeply srt $paths, srt [ '[0]', '[3][0]', '[3][2]', '[3][3][0]' ],
   '... or for a complex array';
 
 $data = { foo => 'bar' };
 ok $paths = path( $data, 'bar' ),
   'Fetching paths for matching data should succeed';
-is_deeply $paths, ['{foo}'], '... we should be able to match simple keys';
+is_deeply srt $paths, srt ['{foo}'], '... we should be able to match simple keys';
 
 $data = {
     foo => 3,
@@ -47,7 +53,7 @@ my @expected = sort qw(
 );
 
 $paths = [ sort @$paths ];
-is_deeply $paths, \@expected,
+is_deeply srt $paths, srt \@expected,
   '... and we should be able to match complex data structures';
 
 foreach my $path (@$paths) {
@@ -61,7 +67,7 @@ ok $paths = path( $data, qr/th/ ), 'Searching with regexes should succeed';
   {bar}[1]
   {baz}{cinq}
 );
-eq_or_diff $paths, \@expected, '... and should return the correct paths';
+eq_or_diff srt $paths, srt \@expected, '... and should return the correct paths';
 
 $data = [ 1, 3 ];
 $data->[2] = $data;
